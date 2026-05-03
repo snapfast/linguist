@@ -1,6 +1,39 @@
 <div class="main">
   <app-header />
-  <div class="content">
-    <router-outlet />
+  <div class="container">
+    <div class="search-section">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+        placeholder="Enter a word..."
+        class="search-input"
+      />
+      <button (click)="search()" class="search-button">Search</button>
+    </div>
+
+    <div *ngIf="isLoading()" class="loading">Loading...</div>
+    <div *ngIf="error()" class="error">{{ error() }}</div>
+
+    <div class="history-sequence" *ngIf="history().length > 0">
+      <div *ngFor="let word of history(); let i = index" class="history-item">
+        <span (click)="search(word)" class="history-word">{{ word }}</span>
+        <span *ngIf="i < history().length - 1" class="separator">→</span>
+      </div>
+    </div>
+
+    <div class="etymology-display" *ngIf="currentEtymology() && !isLoading()">
+      <h2>Etymology of {{ history()[history().length - 1] }}</h2>
+      <div class="etymology-text">
+        <ng-container *ngFor="let part of parsedEtymology()">
+          <span
+            *ngIf="part.isClickable"
+            (click)="handleWordClick(part.text)"
+            class="clickable-word"
+          >{{ part.text }}</span>
+          <span *ngIf="!part.isClickable">{{ part.text }}</span>
+        </ng-container>
+      </div>
+    </div>
   </div>
 </div>
