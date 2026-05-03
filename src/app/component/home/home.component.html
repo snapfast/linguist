@@ -1,4 +1,62 @@
-<p>home works!</p>
+<div class="home-container">
+  <section class="search-hero">
+    <h2 class="hero-title">Trace the lineage of words</h2>
+    <p class="hero-subtitle">Enter a word to discover its origins and etymological journey.</p>
 
+    <div class="search-box">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+        placeholder="e.g., 'philosophy' or 'language'"
+        class="search-input"
+      />
+      <button (click)="search()" class="search-btn">
+        <span class="material-symbols-outlined">search</span>
+        Search
+      </button>
+    </div>
+  </section>
 
-<a routerLink="/words" routerLinkActive="active" ariaCurrentWhenActive="page">words components</a>
+  <div *ngIf="isLoading()" class="state-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Searching wiktionary...</p>
+  </div>
+
+  <div *ngIf="error()" class="state-container error">
+    <span class="material-symbols-outlined">error</span>
+    {{ error() }}
+  </div>
+
+  <section class="history-section" *ngIf="history().length > 0">
+    <div class="breadcrumb-container">
+      <div *ngFor="let word of history(); let i = index" class="breadcrumb-item">
+        <button (click)="search(word)" class="breadcrumb-link" [class.active]="i === history().length - 1">
+          {{ word }}
+        </button>
+        <span *ngIf="i < history().length - 1" class="breadcrumb-separator">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <article class="etymology-card" *ngIf="currentEtymology() && !isLoading()">
+    <header class="card-header">
+      <span class="card-label">Etymology of</span>
+      <h3 class="card-title">{{ history()[history().length - 1] }}</h3>
+    </header>
+    <div class="card-body">
+      <p class="etymology-text">
+        <ng-container *ngFor="let part of parsedEtymology()">
+          <span
+            *ngIf="part.isClickable"
+            (click)="handleWordClick(part.text)"
+            class="clickable-word"
+          >{{ part.text }}</span>
+          <span *ngIf="!part.isClickable">{{ part.text }}</span>
+        </ng-container>
+      </p>
+    </div>
+  </article>
+</div>

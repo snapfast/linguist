@@ -1,0 +1,194 @@
+.home-container {
+  padding: 3rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.search-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.search-box {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: var(--shadow);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--surface-color);
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.search-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+
+.search-btn:hover {
+  background: #000051;
+}
+
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-secondary);
+  padding: 2rem;
+}
+
+.state-container.error {
+  color: var(--error-color);
+  background: #fff5f5;
+  border-radius: var(--border-radius);
+}
+
+.history-section {
+  background: var(--surface-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.breadcrumb-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.breadcrumb-link {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--primary-color);
+  font-weight: 500;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.breadcrumb-link:hover {
+  background: rgba(26, 35, 126, 0.05);
+}
+
+.breadcrumb-link.active {
+  color: var(--text-primary);
+  font-weight: 700;
+  cursor: default;
+}
+
+.breadcrumb-link.active:hover {
+  background: none;
+}
+
+.breadcrumb-separator {
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-separator .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.etymology-card {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1.5rem 2rem;
+  background: rgba(26, 35, 126, 0.02);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-label {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 2rem;
+  text-transform: capitalize;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.etymology-text {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+.clickable-word {
+  cursor: pointer;
+  color: var(--primary-color);
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.clickable-word:hover {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+  background: rgba(184, 134, 11, 0.05);
+}
+
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: 1.8rem;
+  }
+
+  .search-box {
+    flex-direction: column;
+  }
+
+  .search-btn {
+    padding: 1rem;
+    justify-content: center;
+  }
+}

@@ -1,32 +1,77 @@
-.linguist-title {
-	font-family: "Pridi", serif;
-	font-weight: 500;
-	font-size: 50px;
+.header {
+  background-color: var(--surface-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 0;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.linguist-subtitle {
-	font-family: "Pridi", serif;
-	font-weight: 500;
-	font-size: 13px;
-	z-index: 1;
-	position: relative;
-	left: 53%;
-
+.header-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.linguist-header {
-	padding: 30px;
-	margin: 20px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	flex-direction: row;
+.logo {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
-.linguist-actions{
-	display: flex;
-	flex-direction: row;
-	gap: 15px;
+.logo-text {
+  font-size: 1.8rem;
+  margin: 0;
+  line-height: 1;
 }
 
+.logo-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
 
+.nav {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav a {
+  font-weight: 500;
+  color: var(--text-secondary);
+  position: relative;
+  padding: 4px 0;
+}
+
+.nav a:hover, .nav a.active {
+  color: var(--primary-color);
+}
+
+.nav a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--accent-color);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.material-symbols-outlined {
+  color: var(--text-secondary);
+}
+
+button:hover .material-symbols-outlined {
+  color: var(--primary-color);
+}

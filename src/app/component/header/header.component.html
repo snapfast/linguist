@@ -1,23 +1,17 @@
-<div class="linguist-header">
-	<div class="linguist-title">
-		Linguist
-		<div class="linguist-subtitle">
-			by Rahul Bali
-		</div>
-	</div>
-	<div class="linguist-menu">
-		menu
-	</div>
-	<div class="linguist-actions">
-		<button class="linguist-add" mat-stroked-button>
-			<span class="material-symbols-outlined">
-				add
-			</span>
-		</button>
-		<button class="linguist-search" mat-flat-button>
-			<span class="material-symbols-outlined">
-				search
-			</span>
-		</button>
-	</div>
-</div>
+<header class="header">
+  <div class="header-content">
+    <div class="logo" routerLink="/">
+      <h1 class="logo-text">Linguist</h1>
+      <span class="logo-subtitle">Etymological Exploration</span>
+    </div>
+    <nav class="nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+      <a routerLink="/words" routerLinkActive="active">Words</a>
+    </nav>
+    <div class="actions">
+      <button mat-icon-button title="Search" routerLink="/">
+        <span class="material-symbols-outlined">search</span>
+      </button>
+    </div>
+  </div>
+</header>
