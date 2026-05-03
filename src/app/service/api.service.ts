@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
 
-  private languageDataUrl = 'https://script.google.com/macros/s/AKfycbywxsqrihy_yl-if2TvEXIU_dRh9z5SHMWY6c8fSjRZsFCOED_YKSX2ZXlE1UfC-Dfa/exec';
+  private languageDataUrl = environment.languageDataUrl;
 
   constructor(private http: HttpClient) { }
 
