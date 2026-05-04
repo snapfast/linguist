@@ -1,19 +1,57 @@
-<div class="word-cloud-container">
+<div class="word-cloud-container" (click)="closeFragment()">
   <div class="background-text">Linguist</div>
+
+  <svg class="connections-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+    @for (conn of connections(); track $index) {
+      <line
+        [attr.x1]="conn.x1 + '%'"
+        [attr.y1]="conn.y1 + '%'"
+        [attr.x2]="conn.x2 + '%'"
+        [attr.y2]="conn.y2 + '%'"
+        class="connection-line"
+        [class.active-path]="conn.active"
+      />
+    }
+  </svg>
 
   @for (word of displayedWords(); track word.id) {
     <div
       #wordEl
       class="word-node"
+      [class.selected]="activeFragments().has(word.id)"
       [style.left.%]="word.x"
       [style.top.%]="word.y"
-      (click)="handleWordClick(word)"
+      (click)="handleWordClick(word, $event)"
     >
       {{ word.text }}
     </div>
   }
 
-  <button class="refresh-btn" (click)="refreshWords()">
+  @for (frag of activeFragments().values(); track frag.word.id) {
+    <div class="knowledge-fragment" [style.left.%]="frag.word.x" [style.top.%]="frag.word.y" (click)="$event.stopPropagation()">
+      <div class="fragment-content">
+        <h3>{{ frag.word.text }}</h3>
+        <div class="etymology-snippet">
+          @if (frag.isLoading) {
+            <div class="loading-spinner"></div>
+          } @else {
+            @for (token of frag.tokens; track $index) {
+              @if (isClickable(token)) {
+                <span class="clickable-token" (click)="handleTokenClick(token, frag.word, $event)">{{ token }}</span>
+              } @else {
+                {{ token }}
+              }
+            }
+          }
+        </div>
+        <button class="close-btn" (click)="closeFragment(frag.word.id)">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <button class="refresh-btn" (click)="refreshWords($event)">
     <span class="material-symbols-outlined">refresh</span>
     Discover New Roots
   </button>
