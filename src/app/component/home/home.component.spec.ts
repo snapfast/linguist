@@ -29,4 +29,22 @@ describe('HomeComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  describe('handleWordClick', () => {
+    it('should clean word and call search', () => {
+      const searchSpy = spyOn(component, 'search');
+
+      component.handleWordClick('Hello');
+      expect(searchSpy).toHaveBeenCalledWith('hello');
+
+      component.handleWordClick('Latin,');
+      expect(searchSpy).toHaveBeenCalledWith('latin');
+
+      component.handleWordClick('(Greek);');
+      expect(searchSpy).toHaveBeenCalledWith('greek');
+
+      component.handleWordClick('Etymology...');
+      expect(searchSpy).toHaveBeenCalledWith('etymology');
+    });
+  });
 });
