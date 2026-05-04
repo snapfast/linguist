@@ -19,6 +19,31 @@
   z-index: 0;
 }
 
+.connections-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.connection-line {
+  stroke: var(--accent-color);
+  stroke-width: 0.5;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 1.5s ease forwards;
+  opacity: 0.4;
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 .word-node {
   position: absolute;
   padding: 8px 16px;
@@ -30,18 +55,24 @@
   font-family: 'Roboto', sans-serif;
   font-weight: 500;
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
   z-index: 1;
   white-space: nowrap;
   user-select: none;
 }
 
-.word-node:hover {
+.word-node:hover, .word-node.selected {
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   transform: scale(1.1) !important;
   color: var(--accent-color);
   border-color: var(--accent-color);
-  z-index: 2;
+  z-index: 5;
+}
+
+.word-node.selected {
+  background-color: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
 }
 
 .refresh-btn {
@@ -73,4 +104,83 @@
 
 .refresh-btn .material-symbols-outlined {
   font-size: 20px;
+}
+
+.knowledge-fragment {
+  position: absolute;
+  z-index: 100;
+  transform: translate(-50%, -110%);
+  pointer-events: none;
+  animation: fragmentAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.fragment-content {
+  background-color: var(--surface-color);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  border: 1px solid var(--accent-color);
+  width: 320px;
+  max-height: 200px;
+  overflow-y: auto;
+  pointer-events: auto;
+  position: relative;
+}
+
+.fragment-content h3 {
+  margin: 0 0 12px 0;
+  font-family: 'Pridi', serif;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--accent-color);
+  display: inline-block;
+}
+
+.etymology-snippet {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: var(--error-color);
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fragmentAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -90%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -110%) scale(1);
+  }
 }

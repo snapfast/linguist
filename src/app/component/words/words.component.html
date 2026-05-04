@@ -1,19 +1,50 @@
-<div class="word-cloud-container">
+<div class="word-cloud-container" (click)="closeFragment()">
   <div class="background-text">Linguist</div>
+
+  <svg class="connections-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+    @for (conn of connections(); track $index) {
+      <line
+        [attr.x1]="conn.x1 + '%'"
+        [attr.y1]="conn.y1 + '%'"
+        [attr.x2]="conn.x2 + '%'"
+        [attr.y2]="conn.y2 + '%'"
+        class="connection-line"
+      />
+    }
+  </svg>
 
   @for (word of displayedWords(); track word.id) {
     <div
       #wordEl
       class="word-node"
+      [class.selected]="selectedWord()?.id === word.id"
       [style.left.%]="word.x"
       [style.top.%]="word.y"
-      (click)="handleWordClick(word)"
+      (click)="handleWordClick(word, $event)"
     >
       {{ word.text }}
     </div>
   }
 
-  <button class="refresh-btn" (click)="refreshWords()">
+  @if (selectedWord()) {
+    <div class="knowledge-fragment" [style.left.%]="selectedWord()!.x" [style.top.%]="selectedWord()!.y" (click)="$event.stopPropagation()">
+      <div class="fragment-content">
+        <h3>{{ selectedWord()!.text }}</h3>
+        <div class="etymology-snippet">
+          @if (isLoading()) {
+            <div class="loading-spinner"></div>
+          } @else {
+            {{ selectedEtymology() }}
+          }
+        </div>
+        <button class="close-btn" (click)="closeFragment()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <button class="refresh-btn" (click)="refreshWords($event)">
     <span class="material-symbols-outlined">refresh</span>
     Discover New Roots
   </button>
