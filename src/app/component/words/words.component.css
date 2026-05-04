@@ -31,23 +31,24 @@
 
 .connection-line {
   stroke: var(--accent-color);
-  stroke-width: 0.5;
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: drawLine 1.5s ease forwards;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 4 4;
   opacity: 0.2;
   transition: opacity 0.3s ease, stroke-width 0.3s ease;
+  animation: wireFlow 30s linear infinite;
 }
 
 .connection-line.active-path {
   opacity: 0.8;
-  stroke-width: 1;
+  stroke-width: 2px;
+  stroke-dasharray: 4 4;
+  animation: wireFlow 10s linear infinite;
 }
 
-@keyframes drawLine {
-  to {
-    stroke-dashoffset: 0;
-  }
+@keyframes wireFlow {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
 }
 
 .word-node {
@@ -67,7 +68,7 @@
   user-select: none;
 }
 
-.word-node:hover, .word-node.selected {
+.word-node:hover, .word-node.selected, .word-node.related-highlight {
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   transform: scale(1.1) !important;
   color: var(--accent-color);
@@ -79,6 +80,12 @@
   background-color: var(--accent-color);
   color: white;
   border-color: var(--accent-color);
+}
+
+.word-node.related-highlight:not(.selected) {
+  border-width: 2px;
+  border-style: dashed;
+  background-color: rgba(184, 134, 11, 0.05);
 }
 
 .refresh-btn {
@@ -115,8 +122,7 @@
 .knowledge-fragment {
   position: absolute;
   z-index: 100;
-  transform: translate(60px, 60px);
-  pointer-events: none;
+  pointer-events: auto;
   animation: fragmentAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   max-width: calc(100vw - 120px);
 }
@@ -197,10 +203,10 @@
 @keyframes fragmentAppear {
   from {
     opacity: 0;
-    transform: translate(0, 0) scale(0.9);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translate(60px, 60px) scale(1);
+    transform: scale(1);
   }
 }

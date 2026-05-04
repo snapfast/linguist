@@ -1,4 +1,4 @@
-<div class="word-cloud-container" (click)="closeFragment()">
+<div #container class="word-cloud-container" (click)="closeFragment()">
   <div class="background-text">Linguist</div>
 
   <svg class="connections-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -19,6 +19,7 @@
       #wordEl
       class="word-node"
       [class.selected]="activeFragments().has(word.id)"
+      [class.related-highlight]="relatedWordIds().has(word.id)"
       [style.left.%]="word.x"
       [style.top.%]="word.y"
       (click)="handleWordClick(word, $event)"
@@ -28,7 +29,7 @@
   }
 
   @for (frag of activeFragments().values(); track frag.word.id) {
-    <div class="knowledge-fragment" [style.left.%]="frag.word.x" [style.top.%]="frag.word.y" (click)="$event.stopPropagation()">
+    <div class="knowledge-fragment" [style.left.px]="frag.leftPx" [style.top.px]="frag.topPx" (click)="$event.stopPropagation()">
       <div class="fragment-content">
         <h3>{{ frag.word.text }}</h3>
         <div class="etymology-snippet">
