@@ -115,10 +115,10 @@
 .knowledge-fragment {
   position: absolute;
   z-index: 100;
-  transform: translate(10px, 10px);
+  transform: translate(60px, 60px);
   pointer-events: none;
   animation: fragmentAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  max-width: calc(100vw - 40px);
+  max-width: calc(100vw - 120px);
 }
 
 .fragment-content {
@@ -201,6 +201,6 @@
   }
   to {
     opacity: 1;
-    transform: translate(10px, 10px) scale(1);
+    transform: translate(60px, 60px) scale(1);
   }
 }
