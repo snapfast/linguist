@@ -117,15 +117,9 @@ export class WordsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.refreshWords();
-    if (isPlatformBrowser(this.platformId)) {
-      this.refreshInterval = setInterval(() => this.refreshWords(), 15000);
-    }
   }
 
   ngOnDestroy() {
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
-    }
   }
 
   refreshWords(event?: MouseEvent) {
@@ -163,38 +157,12 @@ export class WordsComponent implements OnInit, OnDestroy {
         updatedFragments.set(word.id, { word, etymology, tokens, isLoading: false });
         this.activeFragments.set(updatedFragments);
       }
-
-      const parts = etymology.split(/\s+/)
-        .map(w => w.replace(/[.,();]/g, '').toLowerCase())
-        .filter(w => w.length > 3 && /^[a-z]+$/.test(w));
-
-      const uniqueLinks = Array.from(new Set(parts))
-        .filter(w => !this.displayedWords().some(dw => dw.text === w))
-        .sort((a, b) => b.length - a.length) // Pick longer words as they are often more interesting etymologically
-        .slice(0, 6);
-
-      // Add linked words around the clicked word
-      const newWords: WordNode[] = uniqueLinks.map((w, i) => {
-        const angle = (i / uniqueLinks.length) * 2 * Math.PI;
-        const radius = 15;
-        return {
-          text: w,
-          x: Math.max(10, Math.min(90, word.x + Math.cos(angle) * radius)),
-          y: Math.max(10, Math.min(85, word.y + Math.sin(angle) * radius)),
-          id: this.nextId++,
-          parentId: word.id
-        };
-      });
-
-      const current = this.displayedWords();
-      // Only keep the last 50 words to prevent performance issues but allow longer paths
-      this.displayedWords.set([...current, ...newWords].slice(-50));
     });
   }
 
   isClickable(token: string): boolean {
     const clean = token.replace(/[.,();]/g, '').toLowerCase();
-    return clean.length > 3 && /^[a-z]+$/.test(clean);
+    return clean.length > 3 && /^[a-z]+$/.test(clean) && this.displayedWords().some(w => w.text === clean);
   }
 
   handleTokenClick(token: string, parentWord: WordNode, event: MouseEvent) {
@@ -202,23 +170,11 @@ export class WordsComponent implements OnInit, OnDestroy {
     const clean = token.replace(/[.,();]/g, '').toLowerCase();
 
     // Check if the word is already on the board
-    let existing = this.displayedWords().find(w => w.text === clean);
+    const existing = this.displayedWords().find(w => w.text === clean);
 
-    if (!existing) {
-      // Create it near the parent
-      const angle = Math.random() * 2 * Math.PI;
-      const radius = 12;
-      existing = {
-        text: clean,
-        x: Math.max(10, Math.min(90, parentWord.x + Math.cos(angle) * radius)),
-        y: Math.max(10, Math.min(85, parentWord.y + Math.sin(angle) * radius)),
-        id: this.nextId++,
-        parentId: parentWord.id
-      };
-      this.displayedWords.set([...this.displayedWords(), existing].slice(-50));
+    if (existing) {
+      this.handleWordClick(existing, event, true);
     }
-
-    this.handleWordClick(existing, event, true);
   }
 
   closeFragment(id?: number) {
