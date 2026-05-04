@@ -35,7 +35,13 @@
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
   animation: drawLine 1.5s ease forwards;
-  opacity: 0.4;
+  opacity: 0.2;
+  transition: opacity 0.3s ease, stroke-width 0.3s ease;
+}
+
+.connection-line.active-path {
+  opacity: 0.8;
+  stroke-width: 1;
 }
 
 @keyframes drawLine {
@@ -109,14 +115,15 @@
 .knowledge-fragment {
   position: absolute;
   z-index: 100;
-  transform: translate(-50%, -110%);
+  transform: translate(10px, 10px);
   pointer-events: none;
   animation: fragmentAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  max-width: calc(100vw - 40px);
 }
 
 .fragment-content {
   background-color: var(--surface-color);
-  padding: 24px;
+  padding: 20px;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   border: 1px solid var(--accent-color);
@@ -140,6 +147,19 @@
   font-size: 0.9rem;
   line-height: 1.5;
   color: var(--text-primary);
+}
+
+.clickable-token {
+  color: var(--primary-color);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  transition: color 0.2s ease;
+}
+
+.clickable-token:hover {
+  color: var(--accent-color);
+  background-color: rgba(184, 134, 11, 0.1);
 }
 
 .close-btn {
@@ -177,10 +197,10 @@
 @keyframes fragmentAppear {
   from {
     opacity: 0;
-    transform: translate(-50%, -90%) scale(0.9);
+    transform: translate(0, 0) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -110%) scale(1);
+    transform: translate(10px, 10px) scale(1);
   }
 }

@@ -36,17 +36,27 @@ export class WordsComponent implements OnInit, OnDestroy {
   displayedWords = signal<WordNode[]>([]);
   connections = computed(() => {
     const words = this.displayedWords();
-    return words
-      .filter(w => w.parentId !== undefined)
-      .map(w => {
+    const fragments = this.activeFragments();
+    const conns: { x1: number, y1: number, x2: number, y2: number, active?: boolean }[] = [];
+
+    words.forEach(w => {
+      if (w.parentId !== undefined) {
         const parent = words.find(p => p.id === w.parentId);
-        return parent ? { x1: parent.x, y1: parent.y, x2: w.x, y2: w.y } : null;
-      })
-      .filter(c => c !== null) as { x1: number, y1: number, x2: number, y2: number }[];
+        if (parent) {
+          conns.push({
+            x1: parent.x,
+            y1: parent.y,
+            x2: w.x,
+            y2: w.y,
+            active: fragments.has(w.id) || fragments.has(parent.id)
+          });
+        }
+      }
+    });
+
+    return conns;
   });
-  selectedWord = signal<WordNode | null>(null);
-  selectedEtymology = signal<string | null>(null);
-  isLoading = signal<boolean>(false);
+  activeFragments = signal<Map<number, { word: WordNode, etymology: string | null, tokens: string[], isLoading: boolean }>>(new Map());
 
   private refreshInterval: any;
   private nextId = 0;
@@ -132,20 +142,27 @@ export class WordsComponent implements OnInit, OnDestroy {
     this.displayedWords.set(selected);
   }
 
-  handleWordClick(word: WordNode, event: MouseEvent) {
+  handleWordClick(word: WordNode, event: MouseEvent, forceOpen = false) {
     event.stopPropagation();
-    if (this.selectedWord()?.id === word.id) {
-      this.selectedWord.set(null);
-      this.selectedEtymology.set(null);
+    const fragments = new Map(this.activeFragments());
+
+    if (fragments.has(word.id) && !forceOpen) {
+      fragments.delete(word.id);
+      this.activeFragments.set(fragments);
       return;
     }
 
-    this.selectedWord.set(word);
-    this.isLoading.set(true);
+    // Add new fragment in loading state
+    fragments.set(word.id, { word, etymology: null, tokens: [], isLoading: true });
+    this.activeFragments.set(new Map(fragments));
 
     this.etymologyService.getEtymology(word.text).subscribe(etymology => {
-      this.selectedEtymology.set(etymology);
-      this.isLoading.set(false);
+      const tokens = etymology.split(/(\s+)/);
+      const updatedFragments = new Map(this.activeFragments());
+      if (updatedFragments.has(word.id)) {
+        updatedFragments.set(word.id, { word, etymology, tokens, isLoading: false });
+        this.activeFragments.set(updatedFragments);
+      }
 
       const parts = etymology.split(/\s+/)
         .map(w => w.replace(/[.,();]/g, '').toLowerCase())
@@ -153,29 +170,64 @@ export class WordsComponent implements OnInit, OnDestroy {
 
       const uniqueLinks = Array.from(new Set(parts))
         .filter(w => !this.displayedWords().some(dw => dw.text === w))
-        .slice(0, 5);
+        .sort((a, b) => b.length - a.length) // Pick longer words as they are often more interesting etymologically
+        .slice(0, 6);
 
       // Add linked words around the clicked word
       const newWords: WordNode[] = uniqueLinks.map((w, i) => {
         const angle = (i / uniqueLinks.length) * 2 * Math.PI;
-        const radius = 15; // Closer for a "sprout" look
+        const radius = 15;
         return {
           text: w,
-          x: Math.max(5, Math.min(95, word.x + Math.cos(angle) * radius)),
-          y: Math.max(5, Math.min(90, word.y + Math.sin(angle) * radius)),
+          x: Math.max(10, Math.min(90, word.x + Math.cos(angle) * radius)),
+          y: Math.max(10, Math.min(85, word.y + Math.sin(angle) * radius)),
           id: this.nextId++,
           parentId: word.id
         };
       });
 
-      // Update displayed words: keep some current ones and add new ones
       const current = this.displayedWords();
-      this.displayedWords.set([...current, ...newWords].slice(-25));
+      // Only keep the last 50 words to prevent performance issues but allow longer paths
+      this.displayedWords.set([...current, ...newWords].slice(-50));
     });
   }
 
-  closeFragment() {
-    this.selectedWord.set(null);
-    this.selectedEtymology.set(null);
+  isClickable(token: string): boolean {
+    const clean = token.replace(/[.,();]/g, '').toLowerCase();
+    return clean.length > 3 && /^[a-z]+$/.test(clean);
+  }
+
+  handleTokenClick(token: string, parentWord: WordNode, event: MouseEvent) {
+    event.stopPropagation();
+    const clean = token.replace(/[.,();]/g, '').toLowerCase();
+
+    // Check if the word is already on the board
+    let existing = this.displayedWords().find(w => w.text === clean);
+
+    if (!existing) {
+      // Create it near the parent
+      const angle = Math.random() * 2 * Math.PI;
+      const radius = 12;
+      existing = {
+        text: clean,
+        x: Math.max(10, Math.min(90, parentWord.x + Math.cos(angle) * radius)),
+        y: Math.max(10, Math.min(85, parentWord.y + Math.sin(angle) * radius)),
+        id: this.nextId++,
+        parentId: parentWord.id
+      };
+      this.displayedWords.set([...this.displayedWords(), existing].slice(-50));
+    }
+
+    this.handleWordClick(existing, event, true);
+  }
+
+  closeFragment(id?: number) {
+    if (id !== undefined) {
+      const fragments = new Map(this.activeFragments());
+      fragments.delete(id);
+      this.activeFragments.set(fragments);
+    } else {
+      this.activeFragments.set(new Map());
+    }
   }
 }

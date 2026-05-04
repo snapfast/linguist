@@ -9,6 +9,7 @@
         [attr.x2]="conn.x2 + '%'"
         [attr.y2]="conn.y2 + '%'"
         class="connection-line"
+        [class.active-path]="conn.active"
       />
     }
   </svg>
@@ -17,7 +18,7 @@
     <div
       #wordEl
       class="word-node"
-      [class.selected]="selectedWord()?.id === word.id"
+      [class.selected]="activeFragments().has(word.id)"
       [style.left.%]="word.x"
       [style.top.%]="word.y"
       (click)="handleWordClick(word, $event)"
@@ -26,18 +27,24 @@
     </div>
   }
 
-  @if (selectedWord()) {
-    <div class="knowledge-fragment" [style.left.%]="selectedWord()!.x" [style.top.%]="selectedWord()!.y" (click)="$event.stopPropagation()">
+  @for (frag of activeFragments().values(); track frag.word.id) {
+    <div class="knowledge-fragment" [style.left.%]="frag.word.x" [style.top.%]="frag.word.y" (click)="$event.stopPropagation()">
       <div class="fragment-content">
-        <h3>{{ selectedWord()!.text }}</h3>
+        <h3>{{ frag.word.text }}</h3>
         <div class="etymology-snippet">
-          @if (isLoading()) {
+          @if (frag.isLoading) {
             <div class="loading-spinner"></div>
           } @else {
-            {{ selectedEtymology() }}
+            @for (token of frag.tokens; track $index) {
+              @if (isClickable(token)) {
+                <span class="clickable-token" (click)="handleTokenClick(token, frag.word, $event)">{{ token }}</span>
+              } @else {
+                {{ token }}
+              }
+            }
           }
         </div>
-        <button class="close-btn" (click)="closeFragment()">
+        <button class="close-btn" (click)="closeFragment(frag.word.id)">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
