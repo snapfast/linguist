@@ -1,1 +1,20 @@
-<p>words component works!</p>
+<div class="word-cloud-container">
+  <div class="background-text">Linguist</div>
+
+  @for (word of displayedWords(); track word.id) {
+    <div
+      #wordEl
+      class="word-node"
+      [style.left.%]="word.x"
+      [style.top.%]="word.y"
+      (click)="handleWordClick(word)"
+    >
+      {{ word.text }}
+    </div>
+  }
+
+  <button class="refresh-btn" (click)="refreshWords()">
+    <span class="material-symbols-outlined">refresh</span>
+    Discover New Roots
+  </button>
+</div>
