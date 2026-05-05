@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, OnDestroy, inject, ElementRef, viewChildren, effect, PLATFORM_ID, afterNextRender, computed } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, inject, ElementRef, viewChildren, effect, PLATFORM_ID, afterNextRender, computed, viewChild } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { EtymologyService } from '../../service/etymology.service';
 import { animate, stagger } from 'motion';
@@ -22,23 +22,35 @@ export class WordsComponent implements OnInit, OnDestroy {
   private etymologyService = inject(EtymologyService);
   private platformId = inject(PLATFORM_ID);
 
-  private allWords = [
-    'etymology', 'philology', 'lexicon', 'semantics', 'syntax', 'morphology',
-    'phonology', 'cognate', 'derivation', 'root', 'prefix', 'suffix', 'archaic',
-    'neologism', 'jargon', 'dialect', 'vernacular', 'glossary', 'thesaurus',
-    'dictionary', 'language', 'speech', 'alphabet', 'glyph', 'runes', 'script',
-    'parchment', 'scroll', 'codex', 'manuscript', 'scribe', 'literature',
-    'poetry', 'prose', 'metaphor', 'simile', 'allegory', 'symbol', 'myth',
-    'legend', 'folklore', 'tradition', 'culture', 'history', 'ancient',
-    'modern', 'future', 'cosmos', 'philosophy', 'wisdom', 'knowledge'
-  ];
+  private wordClusters: Record<string, string[]> = {
+    linguistics: [
+      'etymology', 'philology', 'lexicon', 'semantics', 'syntax', 'morphology',
+      'phonology', 'cognate', 'derivation', 'root', 'prefix', 'suffix', 'archaic',
+      'neologism', 'jargon', 'dialect', 'vernacular', 'glossary', 'thesaurus',
+      'dictionary', 'language', 'speech'
+    ],
+    writing: [
+      'alphabet', 'glyph', 'runes', 'script', 'parchment', 'scroll', 'codex',
+      'manuscript', 'scribe', 'ink', 'quill', 'papyrus', 'vellum'
+    ],
+    literature: [
+      'literature', 'poetry', 'prose', 'metaphor', 'simile', 'allegory',
+      'symbol', 'myth', 'legend', 'folklore', 'narrative', 'epic'
+    ],
+    philosophy: [
+      'tradition', 'culture', 'history', 'ancient', 'modern', 'future',
+      'cosmos', 'philosophy', 'wisdom', 'knowledge', 'ontology', 'logic'
+    ]
+  };
 
   displayedWords = signal<WordNode[]>([]);
   connections = computed(() => {
     const words = this.displayedWords();
     const fragments = this.activeFragments();
-    const conns: { x1: number, y1: number, x2: number, y2: number, active?: boolean }[] = [];
+    const discovered = this.discoveredLinks();
+    const conns: { x1: number, y1: number, x2: number, y2: number, active?: boolean, discovered?: boolean }[] = [];
 
+    // Parent-child links
     words.forEach(w => {
       if (w.parentId !== undefined) {
         const parent = words.find(p => p.id === w.parentId);
@@ -54,14 +66,58 @@ export class WordsComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Discovered links
+    discovered.forEach(link => {
+      const [id1, id2] = link.split('-').map(Number);
+      const w1 = words.find(w => w.id === id1);
+      const w2 = words.find(w => w.id === id2);
+      if (w1 && w2) {
+        conns.push({
+          x1: w1.x,
+          y1: w1.y,
+          x2: w2.x,
+          y2: w2.y,
+          active: fragments.has(w1.id) || fragments.has(w2.id),
+          discovered: true
+        });
+      }
+    });
+
     return conns;
   });
-  activeFragments = signal<Map<number, { word: WordNode, etymology: string | null, tokens: string[], isLoading: boolean }>>(new Map());
+
+  relatedWordIds = computed(() => {
+    const fragments = this.activeFragments();
+    const words = this.displayedWords();
+    const discovered = this.discoveredLinks();
+    const related = new Set<number>();
+
+    fragments.forEach((frag, wordId) => {
+      // Find parent/children
+      words.forEach(w => {
+        if (w.parentId === wordId) related.add(w.id);
+        const self = words.find(s => s.id === wordId);
+        if (self && self.parentId === w.id) related.add(w.id);
+      });
+
+      // Find discovered links
+      discovered.forEach(link => {
+        const [id1, id2] = link.split('-').map(Number);
+        if (id1 === wordId) related.add(id2);
+        if (id2 === wordId) related.add(id1);
+      });
+    });
+
+    return related;
+  });
+  activeFragments = signal<Map<number, { word: WordNode, etymology: string | null, tokens: string[], isLoading: boolean, leftPx?: number, topPx?: number }>>(new Map());
+  discoveredLinks = signal<Set<string>>(new Set());
 
   private refreshInterval: any;
   private nextId = 0;
 
   wordElements = viewChildren<ElementRef>('wordEl');
+  container = viewChild<ElementRef>('container');
 
   private animatedIds = new Set<number>();
 
@@ -126,7 +182,13 @@ export class WordsComponent implements OnInit, OnDestroy {
     if (event) event.stopPropagation();
     this.closeFragment();
     this.animatedIds.clear();
-    const shuffled = [...this.allWords].sort(() => 0.5 - Math.random());
+    this.discoveredLinks.set(new Set());
+
+    const categories = Object.keys(this.wordClusters);
+    const category = categories[Math.floor(Math.random() * categories.length)];
+    const clusterWords = this.wordClusters[category];
+
+    const shuffled = [...clusterWords].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 12).map(word => ({
       text: word,
       x: Math.random() * 80 + 10,
@@ -146,16 +208,39 @@ export class WordsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Calculate position
+    const pos = this.calculateFragmentPosition(word);
+
     // Add new fragment in loading state
-    fragments.set(word.id, { word, etymology: null, tokens: [], isLoading: true });
+    fragments.set(word.id, { word, etymology: null, tokens: [], isLoading: true, ...pos });
     this.activeFragments.set(new Map(fragments));
 
     this.etymologyService.getEtymology(word.text).subscribe(etymology => {
       const tokens = etymology.split(/(\s+)/);
       const updatedFragments = new Map(this.activeFragments());
-      if (updatedFragments.has(word.id)) {
-        updatedFragments.set(word.id, { word, etymology, tokens, isLoading: false });
+      const existing = updatedFragments.get(word.id);
+      if (existing) {
+        updatedFragments.set(word.id, { ...existing, etymology, tokens, isLoading: false });
         this.activeFragments.set(updatedFragments);
+
+        // Link with other displayed words found in etymology
+        const displayed = this.displayedWords();
+        const currentLinks = new Set(this.discoveredLinks());
+        let linksAdded = false;
+
+        displayed.forEach(other => {
+          if (other.id !== word.id && etymology.toLowerCase().includes(other.text.toLowerCase())) {
+            const link = [word.id, other.id].sort((a, b) => a - b).join('-');
+            if (!currentLinks.has(link)) {
+              currentLinks.add(link);
+              linksAdded = true;
+            }
+          }
+        });
+
+        if (linksAdded) {
+          this.discoveredLinks.set(new Set(currentLinks));
+        }
       }
     });
   }
@@ -185,5 +270,59 @@ export class WordsComponent implements OnInit, OnDestroy {
     } else {
       this.activeFragments.set(new Map());
     }
+  }
+
+  private calculateFragmentPosition(word: WordNode): { leftPx: number, topPx: number } {
+    const containerEl = this.container()?.nativeElement;
+    const rect = containerEl ? containerEl.getBoundingClientRect() : { width: 1200, height: 800 };
+
+    const wordX = (word.x / 100) * rect.width;
+    const wordY = (word.y / 100) * rect.height;
+
+    // Approximating card dimensions including padding and shadows
+    const CARD_WIDTH = 360;
+    const CARD_HEIGHT = 250;
+    const OFFSET = 60;
+
+    let left = wordX + OFFSET;
+    let top = wordY + OFFSET;
+
+    // Push sideways if overlapping with existing fragments
+    const activeFrags = Array.from(this.activeFragments().values());
+    let collision = true;
+    let attempts = 0;
+
+    while (collision && attempts < 20) {
+      collision = false;
+      for (const frag of activeFrags) {
+        if (frag.leftPx !== undefined && frag.topPx !== undefined) {
+          const dx = Math.abs(left - frag.leftPx);
+          const dy = Math.abs(top - frag.topPx);
+          if (dx < CARD_WIDTH && dy < CARD_HEIGHT) {
+            collision = true;
+            left += 50; // Push sideways
+            top += 30;  // And slightly down
+            break;
+          }
+        }
+      }
+
+      if (left + CARD_WIDTH > rect.width - 40) {
+        left = 40;
+        top += 40;
+      }
+      if (top + CARD_HEIGHT > rect.height - 40) {
+        top = 40;
+      }
+      attempts++;
+    }
+
+    // Boundary clamping
+    if (left + CARD_WIDTH > rect.width - 20) left = Math.max(20, rect.width - CARD_WIDTH - 20);
+    if (top + CARD_HEIGHT > rect.height - 20) top = Math.max(20, rect.height - CARD_HEIGHT - 20);
+    if (left < 20) left = 20;
+    if (top < 20) top = 20;
+
+    return { leftPx: left, topPx: top };
   }
 }
