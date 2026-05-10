@@ -94,9 +94,9 @@ export class WordsComponent implements OnInit, OnDestroy {
 
     fragments.forEach((frag, wordId) => {
       // Find parent/children
+      const self = words.find(s => s.id === wordId);
       words.forEach(w => {
         if (w.parentId === wordId) related.add(w.id);
-        const self = words.find(s => s.id === wordId);
         if (self && self.parentId === w.id) related.add(w.id);
       });
 
