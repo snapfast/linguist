@@ -227,9 +227,10 @@ export class WordsComponent implements OnInit, OnDestroy {
         const displayed = this.displayedWords();
         const currentLinks = new Set(this.discoveredLinks());
         let linksAdded = false;
+        const lowerEtymology = etymology.toLowerCase();
 
         displayed.forEach(other => {
-          if (other.id !== word.id && etymology.toLowerCase().includes(other.text.toLowerCase())) {
+          if (other.id !== word.id && lowerEtymology.includes(other.text.toLowerCase())) {
             const link = [word.id, other.id].sort((a, b) => a - b).join('-');
             if (!currentLinks.has(link)) {
               currentLinks.add(link);
