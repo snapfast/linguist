@@ -1,16 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, shareReplay } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EtymologyService {
   private apiUrl = 'https://en.wiktionary.org/w/api.php';
+  private cache = new Map<string, Observable<string>>();
 
   constructor(private http: HttpClient) {}
 
   getEtymology(word: string): Observable<string> {
+    const cacheKey = word.toLowerCase().trim();
+
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey)!;
+    }
+
     const params = {
       action: 'query',
       prop: 'extracts',
@@ -20,7 +27,7 @@ export class EtymologyService {
       origin: '*'
     };
 
-    return this.http.get<any>(this.apiUrl, { params }).pipe(
+    const request$ = this.http.get<any>(this.apiUrl, { params }).pipe(
       map(response => {
         const pages = response.query.pages;
         const pageId = Object.keys(pages)[0];
@@ -29,8 +36,12 @@ export class EtymologyService {
         }
         const extract = pages[pageId].extract;
         return this.parseEtymology(extract);
-      })
+      }),
+      shareReplay(1)
     );
+
+    this.cache.set(cacheKey, request$);
+    return request$;
   }
 
   private parseEtymology(extract: string): string {
