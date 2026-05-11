@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, OnDestroy, inject, ElementRef, viewChildren, effect, PLATFORM_ID, afterNextRender, computed, viewChild } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, inject, ElementRef, viewChildren, effect, PLATFORM_ID, computed, viewChild } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { EtymologyService } from '../../service/etymology.service';
 import { animate, stagger } from 'motion';
