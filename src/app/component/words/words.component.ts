@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, OnDestroy, inject, ElementRef, viewChildren, effect, PLATFORM_ID, afterNextRender, computed, viewChild } from '@angular/core';
+import { Component, signal, OnInit, inject, ElementRef, viewChildren, effect, PLATFORM_ID, afterNextRender, computed, viewChild } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { EtymologyService } from '../../service/etymology.service';
 import { animate, stagger } from 'motion';
@@ -18,7 +18,7 @@ interface WordNode {
   templateUrl: './words.component.html',
   styleUrl: './words.component.css'
 })
-export class WordsComponent implements OnInit, OnDestroy {
+export class WordsComponent implements OnInit {
   private etymologyService = inject(EtymologyService);
   private platformId = inject(PLATFORM_ID);
 
@@ -113,7 +113,6 @@ export class WordsComponent implements OnInit, OnDestroy {
   activeFragments = signal<Map<number, { word: WordNode, etymology: string | null, tokens: string[], isLoading: boolean, leftPx?: number, topPx?: number }>>(new Map());
   discoveredLinks = signal<Set<string>>(new Set());
 
-  private refreshInterval: any;
   private nextId = 0;
 
   wordElements = viewChildren<ElementRef>('wordEl');
@@ -173,9 +172,6 @@ export class WordsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.refreshWords();
-  }
-
-  ngOnDestroy() {
   }
 
   refreshWords(event?: MouseEvent) {
